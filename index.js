@@ -79,6 +79,9 @@ const cartVendorTotal =
 const cartSavings =
     document.getElementById("cart-savings");
 
+const copyOrderButton =
+    document.getElementById("copy-order");
+
 const clearCartButton =
     document.getElementById("clear-cart");
 
@@ -682,16 +685,20 @@ function createProductCard(product) {
 
             <p class="price-container">
 
-                <span class="card-oldprice">
-                    ${formatPrice(
-                        oldPrice
-                    )}
-                </span>
+                <div class="price-top-row">
+
+                    <span class="card-oldprice">
+                        ${formatPrice(oldPrice)}
+                    </span>
+
+                    <span class="card-sku">
+                        SKU: ${escapeHTML(product.sku || "N/A")}
+                    </span>
+
+                </div>
 
                 <span class="card-price">
-                    ${formatPrice(
-                        price
-                    )}
+                    ${formatPrice(price)}
                 </span>
 
             </p>
@@ -805,6 +812,72 @@ function changeQuantity(
 }
 
 
+async function copyOrder() {
+
+    const entries =
+        Object.values(cart);
+
+    if (entries.length === 0) {
+        return;
+    }
+
+
+    const order = entries
+        .map(cartItem => {
+
+            const product =
+                cartItem.product;
+
+            const quantity =
+                cartItem.quantity;
+
+            const identifier =
+                product.sku?.trim()
+                    || product.name;
+
+            return `${identifier}: ${quantity}`;
+        })
+        .join(",\n");
+
+
+    try {
+
+        await navigator.clipboard.writeText(
+            order
+        );
+
+
+        const originalText =
+            "Copy Order";
+
+        copyOrderButton.textContent =
+            "Copied to Clipboard!";
+
+        copyOrderButton.disabled =
+            true;
+
+
+        setTimeout(() => {
+
+            copyOrderButton.textContent =
+                originalText;
+
+            copyOrderButton.disabled =
+                false;
+
+        }, 2500);
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to copy order:",
+            error
+        );
+    }
+}
+
+
 function clearCart() {
 
     if (
@@ -855,6 +928,10 @@ function renderCart() {
 
     const entries =
         Object.entries(cart);
+    
+    
+    copyOrderButton.disabled =
+        entries.length === 0;
 
 
     if (entries.length === 0) {
@@ -1257,6 +1334,12 @@ cartOverlay.addEventListener(
             );
         }
     }
+);
+
+
+copyOrderButton.addEventListener(
+    "click",
+    copyOrder
 );
 
 

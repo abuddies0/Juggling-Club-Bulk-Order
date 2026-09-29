@@ -667,6 +667,31 @@ main {
     font-weight: 700;
 }
 
+.price-top-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    width: 100%;
+}
+
+.card-sku {
+    color: var(--color-text-secondary);
+
+    font-size: 11px;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
 
 /* =========================================================
    PRODUCT BUTTON
@@ -1212,6 +1237,48 @@ main {
 /* =========================================================
    CLEAR CART
    ========================================================= */
+
+.copy-order-button {
+
+    margin:
+        15px 18px 0;
+
+    padding:
+        11px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color:
+        var(--color-primary);
+
+    color:
+        var(--color-white);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.copy-order-button:hover {
+
+    background-color:
+        var(--color-primary-hover);
+}
+
+
+.copy-order-button:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
 
 .clear-cart-button {
 
