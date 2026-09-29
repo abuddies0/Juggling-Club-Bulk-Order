@@ -85,6 +85,21 @@ const copyOrderButton =
 const clearCartButton =
     document.getElementById("clear-cart");
 
+const clearCartDialog =
+    document.getElementById(
+        "clear-cart-dialog"
+    );
+
+const cancelClearCartButton =
+    document.getElementById(
+        "cancel-clear-cart"
+    );
+
+const confirmClearCartButton =
+    document.getElementById(
+        "confirm-clear-cart"
+    );
+
 
 /* ===== Theme ===== */
 
@@ -886,12 +901,23 @@ function clearCart() {
         return;
     }
 
+    clearCartDialog.classList.remove(
+        "hidden"
+    );
+}
+
+
+function confirmClearCart() {
 
     cart = {};
 
     saveCart();
 
     renderProducts();
+
+    clearCartDialog.classList.add(
+        "hidden"
+    );
 }
 
 
@@ -1349,6 +1375,39 @@ clearCartButton.addEventListener(
 );
 
 
+cancelClearCartButton.addEventListener(
+    "click",
+    () => {
+
+        clearCartDialog.classList.add(
+            "hidden"
+        );
+    }
+);
+
+
+confirmClearCartButton.addEventListener(
+    "click",
+    confirmClearCart
+);
+
+
+clearCartDialog.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target === clearCartDialog
+        ) {
+
+            clearCartDialog.classList.add(
+                "hidden"
+            );
+        }
+    }
+);
+
+
 /* =========================================================
    ESCAPE KEY
    ========================================================= */
@@ -1365,6 +1424,19 @@ document.addEventListener(
         ) {
 
             cartOverlay.classList.add(
+                "hidden"
+            );
+        }
+
+
+        if (
+            event.key === "Escape" &&
+            !clearCartDialog.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            clearCartDialog.classList.add(
                 "hidden"
             );
         }

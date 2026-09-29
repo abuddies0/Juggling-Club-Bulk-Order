@@ -861,6 +861,183 @@ main {
 
 
 /* =========================================================
+   CONFIRMATION DIALOG
+   ========================================================= */
+
+.dialog-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background-color:
+        var(--color-overlay);
+}
+
+
+.dialog-overlay.hidden {
+
+    display: none;
+}
+
+
+.confirmation-dialog {
+
+    width: min(
+        420px,
+        100%
+    );
+
+    padding: 24px;
+
+    border:
+        1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    background-color:
+        var(--color-surface);
+
+    box-shadow:
+        0 10px 30px var(--color-shadow);
+
+    color:
+        var(--color-text);
+
+    animation:
+        dialog-appear 0.15s ease-out;
+}
+
+
+.confirmation-dialog h2 {
+
+    margin:
+        0 0 10px;
+
+    color:
+        var(--color-text);
+
+    font-size: 20px;
+}
+
+
+.confirmation-dialog p {
+
+    margin:
+        0 0 24px;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.dialog-buttons {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+
+.dialog-cancel-button,
+.dialog-confirm-button {
+
+    padding:
+        9px 16px;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* ===== Cancel ===== */
+
+.dialog-cancel-button {
+
+    border:
+        1px solid var(--color-border);
+
+    background-color:
+        var(--color-surface-secondary);
+
+    color:
+        var(--color-text);
+}
+
+
+.dialog-cancel-button:hover {
+
+    border-color:
+        var(--color-primary);
+
+    color:
+        var(--color-primary);
+}
+
+
+/* ===== Confirm ===== */
+
+.dialog-confirm-button {
+
+    border: none;
+
+    background-color:
+        var(--color-danger);
+
+    color:
+        var(--color-white);
+}
+
+
+.dialog-confirm-button:hover {
+
+    background-color:
+        var(--color-danger-hover);
+}
+
+
+@keyframes dialog-appear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            scale(0.97)
+            translateY(-5px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            scale(1)
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
    CART PANEL
    ========================================================= */
 
