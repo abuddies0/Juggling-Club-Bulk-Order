@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <link rel="icon" type="image/png" href="juggling_club_logo.png">
+
+    <title>Juggling Bulk Order</title>
+
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+
+    <header id="top-bar">
+
+        <div class="header-content">
+
+            <h1>Juggling Bulk Order</h1>
+
+            <div class="header-buttons">
+
+                <button
+                    id="theme-toggle"
+                    class="theme-toggle"
+                    aria-label="Toggle dark mode"
+                >
+                    🌙
+                </button>
+
+                <button
+                    id="cart-button"
+                    class="cart-button"
+                >
+                    🛒 Cart
+                    <span id="cart-count">0</span>
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="search-controls">
+
+            <input
+                id="search-input"
+                type="search"
+                placeholder="Search products..."
+                autocomplete="off"
+            >
+
+            <div id="filter-row">
+
+                <select id="type-filter">
+                    <option value="">All Types</option>
+                </select>
+
+                <select id="color-filter">
+                    <option value="">All Colors</option>
+                </select>
+
+                <select id="vendor-filter">
+                    <option value="">All Vendors</option>
+                </select>
+
+                <select id="confidence-filter">
+                    <option value="">All Confidence</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <div class="price-filter">
+
+                    <label>
+                        Min $
+                        <input
+                            id="min-price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                        >
+                    </label>
+
+                    <label>
+                        Max $
+                        <input
+                            id="max-price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="∞"
+                        >
+                    </label>
+
+                </div>
+
+                <button
+                    id="clear-filters"
+                    class="secondary-button"
+                >
+                    Clear Filters
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <div id="result-info">
+            <span id="result-count">
+                Loading...
+            </span>
+        </div>
+
+        <div id="card-container">
+
+            <div id="loading-screen"></div>
+
+        </div>
+
+        <div id="load-more-container">
+
+            <button
+                id="load-more"
+                class="load-more-button"
+            >
+                Load More
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <div
+        id="cart-overlay"
+        class="hidden"
+    >
+
+        <div id="cart-panel">
+
+            <div class="cart-header">
+
+                <h2>Shopping List</h2>
+
+                <button
+                    id="close-cart"
+                    class="close-button"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div id="cart-items"></div>
+
+
+            <div id="empty-cart">
+                Your shopping list is empty.
+            </div>
+
+
+            <div id="cart-summary">
+
+                <div class="summary-row">
+
+                    <span>
+                        Bulk Order
+                    </span>
+
+                    <strong id="cart-bulk-total">
+                        $0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Vendor Price
+                    </span>
+
+                    <strong id="cart-vendor-total">
+                        $0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-row savings-row">
+
+                    <span>
+                        Total Savings
+                    </span>
+
+                    <strong id="cart-savings">
+                        $0.00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="clear-cart"
+                class="clear-cart-button"
+            >
+                Clear Shopping List
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="./index.js"></script>
+
+</body>
+</html>
