@@ -1,8 +1,16 @@
+const FORM_LINK =
+ "https://docs.google.com/forms/d/e/1FAIpQLScI-1qgMCGhQgzdsenBt1MzKtdyFpCehfJFjNnA-YG3qHFIhg/viewform?usp=pp_url&entry.13087554={{NAME}}&entry.2096004215={{EMAIL}}&entry.927686952={{ITEM_NAME}}&entry.1026536920={{ITEM_SKU}}&entry.1024599410={{ITEM_QTY}}&entry.1629513907={{ITEM_COLOR}}";
+
+// const FORM_LINK =
+//   "https://docs.google.com/forms/d/e/1FAIpQLSfbJgphqpuB3G9-JdHrKdFjhXXxlXwhq9_Wv-ieHgdSgnDtSw/viewform?usp=pp_url&entry.13087554=%7B%7BNAME%7D%7D&entry.2096004215=%7B%7BEMAIL%7D%7D&entry.927686952=%7B%7BITEM_NAME%7D%7D&entry.1026536920=%7B%7BITEM_SKU%7D%7D&entry.1024599410=%7B%7BITEM_QTY%7D%7D&entry.1629513907=%7B%7BITEM_COLOR%7D%7D";
+
 const data_url = "yoyosam_products_simple.json";
 
 const CART_STORAGE_KEY = "juggling_bulk_order_cart";
 
 const THEME_STORAGE_KEY = "juggling_bulk_order_theme";
+
+const BUYER_INFO_STORAGE_KEY = "juggling_bulk_order_buyer_info";
 
 const PRODUCTS_PER_PAGE = 100;
 
@@ -20,7 +28,15 @@ const colorFilter = document.getElementById("color-filter");
 
 const vendorFilter = document.getElementById("vendor-filter");
 
-const confidenceFilter = document.getElementById("confidence-filter");
+const confidenceDropdown = document.getElementById("confidence-dropdown");
+
+const confidenceDropdownButton = document.getElementById("confidence-dropdown-button");
+
+const confidenceDropdownMenu = document.getElementById("confidence-dropdown-menu");
+
+const confidenceDropdownLabel = document.getElementById("confidence-dropdown-label");
+
+const confidenceOptions = confidenceDropdownMenu.querySelectorAll('input[type="checkbox"]');
 
 const minPriceInput = document.getElementById("min-price");
 
@@ -63,6 +79,22 @@ const clearCartDialog = document.getElementById("clear-cart-dialog");
 const cancelClearCartButton = document.getElementById("cancel-clear-cart");
 
 const confirmClearCartButton = document.getElementById("confirm-clear-cart");
+
+const checkoutButton = document.getElementById("checkout-button");
+
+const checkoutDialog = document.getElementById("checkout-dialog");
+
+const cancelCheckoutButton = document.getElementById("cancel-checkout");
+
+const confirmCheckoutButton = document.getElementById("confirm-checkout");
+
+const buyerNameInput = document.getElementById("buyer-name");
+
+const buyerEmailInput = document.getElementById("buyer-email");
+
+const buyerEmailConfirmInput = document.getElementById("buyer-email-confirm");
+
+const checkoutError = document.getElementById("checkout-error");
 
 /* ===== Theme ===== */
 
@@ -117,6 +149,32 @@ function getProductID(product) {
   return [product.sku, product.upc, product.name, product.color].map(normalize).join("|");
 }
 
+function getSelectedConfidences() {
+  return [...confidenceOptions].filter((option) => option.checked).map((option) => option.value);
+}
+
+function updateConfidenceDropdownLabel() {
+  const selected = getSelectedConfidences();
+
+  if (selected.length === 0) {
+    confidenceDropdownLabel.textContent = "Confidence";
+
+    return;
+  }
+
+  if (selected.length === confidenceOptions.length) {
+    confidenceDropdownLabel.textContent = "All Confidence";
+
+    return;
+  }
+
+  const names = selected.map((value) => {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  });
+
+  confidenceDropdownLabel.textContent = `Confidence: ${names.join(", ")}`;
+}
+
 /* =========================================================
    CART STORAGE
    ========================================================= */
@@ -147,6 +205,47 @@ function saveCart() {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
 
   updateCartUI();
+}
+
+/* =========================================================
+   BUYER STORAGE
+   ========================================================= */
+
+function loadBuyerInfo() {
+  try {
+    const saved = localStorage.getItem(BUYER_INFO_STORAGE_KEY);
+
+    if (!saved) {
+      return {
+        name: "",
+        email: "",
+      };
+    }
+
+    const info = JSON.parse(saved);
+
+    return {
+      name: info.name || "",
+      email: info.email || "",
+    };
+  } catch (error) {
+    console.error("Failed to load buyer information:", error);
+
+    return {
+      name: "",
+      email: "",
+    };
+  }
+}
+
+function saveBuyerInfo(name, email) {
+  localStorage.setItem(
+    BUYER_INFO_STORAGE_KEY,
+    JSON.stringify({
+      name,
+      email,
+    }),
+  );
 }
 
 /* =========================================================
@@ -196,9 +295,8 @@ async function main() {
 
     initializeFilters();
 
-    filteredProducts = productData;
-
-    renderProducts();
+    applyFilters();
+    updateConfidenceDropdownLabel();
 
     updateCartUI();
   } catch (error) {
@@ -275,7 +373,7 @@ function applyFilters() {
 
   const selectedVendor = normalize(vendorFilter.value);
 
-  const selectedConfidence = normalize(confidenceFilter.value);
+  const selectedConfidences = getSelectedConfidences();
 
   const minPrice = parsePrice(minPriceInput.value);
 
@@ -298,7 +396,7 @@ function applyFilters() {
       return false;
     }
 
-    if (selectedConfidence && product._normalizedConfidence !== selectedConfidence) {
+    if (selectedConfidences.length > 0 && !selectedConfidences.includes(product._normalizedConfidence)) {
       return false;
     }
 
@@ -320,7 +418,11 @@ function clearFilters() {
   typeFilter.value = "";
   colorFilter.value = "";
   vendorFilter.value = "";
-  confidenceFilter.value = "";
+  for (const option of confidenceOptions) {
+    option.checked = option.value === "high" || option.value === "medium";
+  }
+
+  updateConfidenceDropdownLabel();
 
   minPriceInput.value = "";
   maxPriceInput.value = "";
@@ -420,7 +522,7 @@ function createProductCard(product) {
             <hr class="simple-line">
 
 
-            <p class="price-container">
+            <div class="price-container">
 
                 <div class="price-top-row">
 
@@ -438,17 +540,57 @@ function createProductCard(product) {
                     ${formatPrice(price)}
                 </span>
 
-            </p>
+            </div>
 
 
-            <button
-                class="card-btn ${inCart ? "remove-from-cart" : ""}"
+            ${
+              inCart
+                ? `
+            <div
+                class="quantity-selector"
                 data-product-id="${escapeHTML(id)}"
             >
 
-                ${inCart ? "Remove From Cart" : "Add to Cart"}
+                <button
+                    class="quantity-button quantity-minus"
+                    data-product-id="${escapeHTML(id)}"
+                    type="button"
+                    aria-label="Decrease quantity"
+                >
+                    −
+                </button>
 
+                <input
+                    class="quantity-input"
+                    data-product-id="${escapeHTML(id)}"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value="${cart[id].quantity}"
+                    aria-label="Quantity"
+                >
+
+                <button
+                    class="quantity-button quantity-plus"
+                    data-product-id="${escapeHTML(id)}"
+                    type="button"
+                    aria-label="Increase quantity"
+                >
+                    +
+                </button>
+
+            </div>
+        `
+                : `
+            <button
+                class="card-btn"
+                data-product-id="${escapeHTML(id)}"
+                type="button"
+            >
+                Add to Cart
             </button>
+        `
+            }
 
         </div>
     `;
@@ -491,6 +633,34 @@ function removeFromCart(id) {
   delete cart[id];
 
   saveCart();
+
+  renderProducts();
+}
+
+function setCartQuantity(id, quantity) {
+  quantity = Number(quantity);
+
+  if (!Number.isFinite(quantity)) {
+    return;
+  }
+
+  quantity = Math.floor(quantity);
+
+  if (quantity <= 0) {
+    removeFromCart(id);
+
+    return;
+  }
+
+  if (!cart[id]) {
+    return;
+  }
+
+  cart[id].quantity = quantity;
+
+  saveCart();
+
+  renderCart();
 
   renderProducts();
 }
@@ -716,12 +886,193 @@ function renderCart() {
   cartSavings.textContent = formatPrice(Math.max(0, savings));
 }
 
+function groupCartItemsForCheckout() {
+  const groups = new Map();
+
+  for (const cartItem of Object.values(cart)) {
+    const product = cartItem.product;
+
+    const quantity = cartItem.quantity;
+
+    const name = product.name || "";
+
+    if (!groups.has(name)) {
+      groups.set(name, {
+        name,
+        quantity: 0,
+        colors: [],
+        sku: product.sku || "",
+      });
+    }
+
+    const group = groups.get(name);
+
+    group.quantity += quantity;
+
+    const color = product.color?.trim();
+
+    if (color) {
+      group.colors.push({
+        quantity,
+        color,
+      });
+    }
+  }
+
+  return [...groups.values()];
+}
+
+function createCheckoutURL(group, name, email) {
+  const url = new URL(FORM_LINK);
+
+  const colorText = group.colors.map((entry) => `${entry.quantity} ${entry.color}`).join(", ");
+
+  const replacements = {
+    "{{NAME}}": name,
+    "{{EMAIL}}": email,
+    "{{ITEM_NAME}}": group.name,
+    "{{ITEM_SKU}}": group.sku.replace(/-.*$/g, ""),
+    "{{ITEM_QTY}}": String(group.quantity),
+    "{{ITEM_COLOR}}": colorText,
+  };
+
+  for (const [label, value] of Object.entries(replacements)) {
+    for (const [key, existingValue] of url.searchParams.entries()) {
+      if (existingValue === label) {
+        url.searchParams.set(key, value);
+      }
+    }
+  }
+
+  return url.toString();
+}
+
+function openCheckoutDialog() {
+  const buyerInfo = loadBuyerInfo();
+
+  buyerNameInput.value = buyerInfo.name;
+
+  buyerEmailInput.value = buyerInfo.email;
+
+  buyerEmailConfirmInput.value = buyerInfo.email;
+
+  checkoutError.textContent = "";
+
+  checkoutError.classList.add("hidden");
+
+  checkoutDialog.classList.remove("hidden");
+
+  buyerNameInput.focus();
+}
+
+function submitCheckout() {
+  const name = buyerNameInput.value.trim();
+
+  const email = buyerEmailInput.value.trim();
+
+  const emailConfirm = buyerEmailConfirmInput.value.trim();
+
+  checkoutError.classList.add("hidden");
+
+  checkoutError.textContent = "";
+
+  if (!name) {
+    showCheckoutError("Please enter your name.");
+
+    buyerNameInput.focus();
+
+    return;
+  }
+
+  if (!email) {
+    showCheckoutError("Please enter your email address.");
+
+    buyerEmailInput.focus();
+
+    return;
+  }
+
+  if (!emailConfirm) {
+    showCheckoutError("Please retype your email address.");
+
+    buyerEmailConfirmInput.focus();
+
+    return;
+  }
+
+  if (email !== emailConfirm) {
+    showCheckoutError("The email addresses do not match.");
+
+    buyerEmailConfirmInput.focus();
+
+    return;
+  }
+
+  if (!buyerEmailInput.checkValidity()) {
+    showCheckoutError("Please enter a valid email address.");
+
+    buyerEmailInput.focus();
+
+    return;
+  }
+
+  const groups = groupCartItemsForCheckout();
+
+  if (groups.length === 0) {
+    return;
+  }
+
+  saveBuyerInfo(name, email);
+
+  /*
+   * Open all tabs immediately while this function
+   * is still executing as the result of the user's
+   * Checkout click.
+   */
+  const windows = groups.map(() => window.open("about:blank", "_blank"));
+
+  /*
+   * Check whether the browser blocked any popups.
+   */
+  const blocked = windows.some((window) => !window);
+
+  if (blocked) {
+    for (const window of windows) {
+      if (window) {
+        window.close();
+      }
+    }
+
+    showCheckoutError("Your browser blocked the checkout tabs. " + "Please allow pop-ups for this site and try again.");
+
+    return;
+  }
+
+  /*
+   * Now that all tabs have been opened, navigate
+   * each one to its corresponding Google Form.
+   */
+  groups.forEach((group, index) => {
+    const url = createCheckoutURL(group, name, email);
+
+    windows[index].location.href = url;
+  });
+
+  checkoutDialog.classList.add("hidden");
+}
+
+function showCheckoutError(message) {
+  checkoutError.textContent = message;
+
+  checkoutError.classList.remove("hidden");
+}
+
 /* =========================================================
    PRODUCT CARD EVENT DELEGATION
    ========================================================= */
 
 cardContainer.addEventListener("click", (event) => {
-  const button = event.target.closest(".card-btn");
+  const button = event.target.closest("[data-product-id]");
 
   if (!button) {
     return;
@@ -729,17 +1080,45 @@ cardContainer.addEventListener("click", (event) => {
 
   const id = button.dataset.productId;
 
-  const product = productData.find((product) => product._id === id);
+  if (button.classList.contains("quantity-minus")) {
+    setCartQuantity(id, cart[id].quantity - 1);
 
-  if (!product) {
     return;
   }
 
-  if (cart[id]) {
-    removeFromCart(id);
-  } else {
-    addToCart(product);
+  if (button.classList.contains("quantity-plus")) {
+    setCartQuantity(id, cart[id].quantity + 1);
+
+    return;
   }
+
+  if (button.classList.contains("card-btn")) {
+    addToCart(productData.find((product) => product._id === id));
+
+    return;
+  }
+});
+
+cardContainer.addEventListener("change", (event) => {
+  const input = event.target.closest(".quantity-input");
+
+  if (!input) {
+    return;
+  }
+
+  const id = input.dataset.productId;
+
+  setCartQuantity(id, input.value);
+});
+
+cardContainer.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || !event.target.matches(".quantity-input")) {
+    return;
+  }
+
+  event.preventDefault();
+
+  event.target.blur();
 });
 
 /* =========================================================
@@ -784,13 +1163,29 @@ colorFilter.addEventListener("change", applyFilters);
 
 vendorFilter.addEventListener("change", applyFilters);
 
-confidenceFilter.addEventListener("change", applyFilters);
-
 minPriceInput.addEventListener("input", applyFilters);
 
 maxPriceInput.addEventListener("input", applyFilters);
 
 clearFiltersButton.addEventListener("click", clearFilters);
+
+confidenceDropdownButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  confidenceDropdownMenu.classList.toggle("hidden");
+});
+
+for (const option of confidenceOptions) {
+  option.addEventListener("change", () => {
+    updateConfidenceDropdownLabel();
+    applyFilters();
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (!confidenceDropdown.contains(event.target)) {
+    confidenceDropdownMenu.classList.add("hidden");
+  }
+});
 
 /* =========================================================
    CART OPEN / CLOSE
@@ -826,6 +1221,20 @@ clearCartDialog.addEventListener("click", (event) => {
   }
 });
 
+checkoutButton.addEventListener("click", openCheckoutDialog);
+
+cancelCheckoutButton.addEventListener("click", () => {
+  checkoutDialog.classList.add("hidden");
+});
+
+confirmCheckoutButton.addEventListener("click", submitCheckout);
+
+checkoutDialog.addEventListener("click", (event) => {
+  if (event.target === checkoutDialog) {
+    checkoutDialog.classList.add("hidden");
+  }
+});
+
 /* =========================================================
    ESCAPE KEY
    ========================================================= */
@@ -837,6 +1246,15 @@ document.addEventListener("keydown", (event) => {
 
   if (event.key === "Escape" && !clearCartDialog.classList.contains("hidden")) {
     clearCartDialog.classList.add("hidden");
+  }
+});
+
+/* =========================================================
+   ENTER KEY
+   ========================================================= */
+checkoutDialog.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target.tagName === "INPUT") {
+    submitCheckout();
   }
 });
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="juggling_club_logo.png" />
 
-    <title>Juggling Bulk Order</title>
+    <title>Juggling Club Bulk Order</title>
 
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -13,7 +13,7 @@
   <body>
     <header id="top-bar">
       <div class="header-content">
-        <h1>Juggling Bulk Order</h1>
+        <h1>Juggling Club Bulk Order</h1>
 
         <div class="header-buttons">
           <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
@@ -41,12 +41,29 @@
             <option value="">All Vendors</option>
           </select>
 
-          <select id="confidence-filter">
-            <option value="">All Confidence</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+          <div id="confidence-dropdown" class="filter-dropdown">
+            <button id="confidence-dropdown-button" class="filter-dropdown-button" type="button">
+              <span id="confidence-dropdown-label"> Confidence </span>
+              <span class="filter-dropdown-arrow">▼</span>
+            </button>
+
+            <div id="confidence-dropdown-menu" class="filter-dropdown-menu hidden">
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="high" checked />
+                <span>High</span>
+              </label>
+
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="medium" checked />
+                <span>Medium</span>
+              </label>
+
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="low" />
+                <span>Low</span>
+              </label>
+            </div>
+          </div>
 
           <div class="price-filter">
             <label>
@@ -111,9 +128,15 @@
           </div>
         </div>
 
-        <button id="copy-order" class="copy-order-button">Copy Order</button>
+        <div class="cart-action-buttons">
+          <div class="cart-secondary-buttons">
+            <button id="copy-order" class="copy-order-button">Copy Order</button>
 
-        <button id="clear-cart" class="clear-cart-button">Clear Shopping List</button>
+            <button id="clear-cart" class="clear-cart-button">Clear Shopping List</button>
+          </div>
+
+          <button id="checkout-button" class="checkout-button">Checkout</button>
+        </div>
       </div>
     </div>
 
@@ -127,6 +150,39 @@
           <button id="cancel-clear-cart" class="dialog-cancel-button">Cancel</button>
 
           <button id="confirm-clear-cart" class="dialog-confirm-button">Clear List</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="checkout-dialog" class="dialog-overlay hidden">
+      <div class="confirmation-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-dialog-title">
+        <h2 id="checkout-dialog-title">Checkout</h2>
+
+        <div class="checkout-warning">
+          <strong>Important:</strong><br />
+          All purchases are made through Google Forms. Pressing the Checkout button below opens pre-filled Google Forms for you to make the process easier.
+        </div>
+
+        <div class="checkout-form">
+          <label for="buyer-name"> Name <span class="required-star">*</span> </label>
+
+          <input id="buyer-name" type="text" autocomplete="name" required />
+
+          <label for="buyer-email"> Email <span class="required-star">*</span> </label>
+
+          <input id="buyer-email" type="email" autocomplete="email" required />
+
+          <label for="buyer-email-confirm"> Retype Email <span class="required-star">*</span> </label>
+
+          <input id="buyer-email-confirm" type="email" autocomplete="email" required />
+
+          <p id="checkout-error" class="checkout-error hidden"></p>
+        </div>
+
+        <div class="dialog-buttons">
+          <button id="cancel-checkout" class="dialog-cancel-button">Cancel</button>
+
+          <button id="confirm-checkout" class="dialog-confirm-button">Checkout</button>
         </div>
       </div>
     </div>
