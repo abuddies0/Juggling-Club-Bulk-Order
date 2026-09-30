@@ -336,10 +336,14 @@ body {
 }
 
 #confidence-dropdown-label {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#color-filter {
+  max-width: 100%;
 }
 
 #filter-row {
@@ -400,6 +404,43 @@ body {
 
 .price-filter input {
   width: 90px;
+}
+
+@media (max-width: 600px) {
+  #filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  #filter-row > * {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  #color-filter,
+  #type-filter,
+  #vendor-filter {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+
+  .price-filter {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  #clear-filters {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 }
 
 /* =========================================================
