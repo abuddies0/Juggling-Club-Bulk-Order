@@ -826,7 +826,7 @@ function createCheckoutURL(group, name, email) {
     "{{NAME}}": name,
     "{{EMAIL}}": email,
     "{{ITEM_NAME}}": group.name,
-    "{{ITEM_SKU}}": group.sku,
+    "{{ITEM_SKU}}": group.sku.replace(/-.*$/g, ""),
     "{{ITEM_QTY}}": String(group.quantity),
     "{{ITEM_COLOR}}": colorText,
   };
