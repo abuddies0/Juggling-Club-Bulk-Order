@@ -28,7 +28,15 @@ const colorFilter = document.getElementById("color-filter");
 
 const vendorFilter = document.getElementById("vendor-filter");
 
-const confidenceFilter = document.getElementById("confidence-filter");
+const confidenceDropdown = document.getElementById("confidence-dropdown");
+
+const confidenceDropdownButton = document.getElementById("confidence-dropdown-button");
+
+const confidenceDropdownMenu = document.getElementById("confidence-dropdown-menu");
+
+const confidenceDropdownLabel = document.getElementById("confidence-dropdown-label");
+
+const confidenceOptions = confidenceDropdownMenu.querySelectorAll('input[type="checkbox"]');
 
 const minPriceInput = document.getElementById("min-price");
 
@@ -139,6 +147,32 @@ function escapeHTML(value) {
 
 function getProductID(product) {
   return [product.sku, product.upc, product.name, product.color].map(normalize).join("|");
+}
+
+function getSelectedConfidences() {
+  return [...confidenceOptions].filter((option) => option.checked).map((option) => option.value);
+}
+
+function updateConfidenceDropdownLabel() {
+  const selected = getSelectedConfidences();
+
+  if (selected.length === 0) {
+    confidenceDropdownLabel.textContent = "Confidence";
+
+    return;
+  }
+
+  if (selected.length === confidenceOptions.length) {
+    confidenceDropdownLabel.textContent = "All Confidence";
+
+    return;
+  }
+
+  const names = selected.map((value) => {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  });
+
+  confidenceDropdownLabel.textContent = `Confidence: ${names.join(", ")}`;
 }
 
 /* =========================================================
@@ -261,11 +295,11 @@ async function main() {
 
     initializeFilters();
 
-    filteredProducts = productData;
-
-    renderProducts();
+    applyFilters();
+    updateConfidenceDropdownLabel();
 
     updateCartUI();
+
   } catch (error) {
     console.error("Failed to load product data:", error);
 
@@ -340,7 +374,7 @@ function applyFilters() {
 
   const selectedVendor = normalize(vendorFilter.value);
 
-  const selectedConfidence = normalize(confidenceFilter.value);
+  const selectedConfidences = getSelectedConfidences();
 
   const minPrice = parsePrice(minPriceInput.value);
 
@@ -363,7 +397,7 @@ function applyFilters() {
       return false;
     }
 
-    if (selectedConfidence && product._normalizedConfidence !== selectedConfidence) {
+    if (selectedConfidences.length > 0 && !selectedConfidences.includes(product._normalizedConfidence)) {
       return false;
     }
 
@@ -385,7 +419,11 @@ function clearFilters() {
   typeFilter.value = "";
   colorFilter.value = "";
   vendorFilter.value = "";
-  confidenceFilter.value = "";
+  for (const option of confidenceOptions) {
+    option.checked = option.value === "high" || option.value === "medium";
+  }
+
+  updateConfidenceDropdownLabel();
 
   minPriceInput.value = "";
   maxPriceInput.value = "";
@@ -1030,13 +1068,29 @@ colorFilter.addEventListener("change", applyFilters);
 
 vendorFilter.addEventListener("change", applyFilters);
 
-confidenceFilter.addEventListener("change", applyFilters);
-
 minPriceInput.addEventListener("input", applyFilters);
 
 maxPriceInput.addEventListener("input", applyFilters);
 
 clearFiltersButton.addEventListener("click", clearFilters);
+
+confidenceDropdownButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  confidenceDropdownMenu.classList.toggle("hidden");
+});
+
+for (const option of confidenceOptions) {
+  option.addEventListener("change", () => {
+    updateConfidenceDropdownLabel();
+    applyFilters();
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (!confidenceDropdown.contains(event.target)) {
+    confidenceDropdownMenu.classList.add("hidden");
+  }
+});
 
 /* =========================================================
    CART OPEN / CLOSE

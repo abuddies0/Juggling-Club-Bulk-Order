@@ -41,12 +41,29 @@
             <option value="">All Vendors</option>
           </select>
 
-          <select id="confidence-filter">
-            <option value="">All Confidence</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+          <div id="confidence-dropdown" class="filter-dropdown">
+            <button id="confidence-dropdown-button" class="filter-dropdown-button" type="button">
+              <span id="confidence-dropdown-label"> Confidence </span>
+              <span class="filter-dropdown-arrow">▼</span>
+            </button>
+
+            <div id="confidence-dropdown-menu" class="filter-dropdown-menu hidden">
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="high" checked />
+                <span>High</span>
+              </label>
+
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="medium" checked />
+                <span>Medium</span>
+              </label>
+
+              <label class="filter-dropdown-option">
+                <input type="checkbox" value="low" />
+                <span>Low</span>
+              </label>
+            </div>
+          </div>
 
           <div class="price-filter">
             <label>
@@ -142,7 +159,7 @@
         <h2 id="checkout-dialog-title">Checkout</h2>
 
         <div class="checkout-warning">
-          <strong>Important:</strong><br>
+          <strong>Important:</strong><br />
           All purchases are made through Google Forms. Pressing the Checkout button below opens pre-filled Google Forms for you to make the process easier.
         </div>
 
