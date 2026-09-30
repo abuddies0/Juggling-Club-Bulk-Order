@@ -299,7 +299,6 @@ async function main() {
     updateConfidenceDropdownLabel();
 
     updateCartUI();
-
   } catch (error) {
     console.error("Failed to load product data:", error);
 
@@ -523,7 +522,7 @@ function createProductCard(product) {
             <hr class="simple-line">
 
 
-            <p class="price-container">
+            <div class="price-container">
 
                 <div class="price-top-row">
 
@@ -541,17 +540,57 @@ function createProductCard(product) {
                     ${formatPrice(price)}
                 </span>
 
-            </p>
+            </div>
 
 
-            <button
-                class="card-btn ${inCart ? "remove-from-cart" : ""}"
+            ${
+              inCart
+                ? `
+            <div
+                class="quantity-selector"
                 data-product-id="${escapeHTML(id)}"
             >
 
-                ${inCart ? "Remove From Cart" : "Add to Cart"}
+                <button
+                    class="quantity-button quantity-minus"
+                    data-product-id="${escapeHTML(id)}"
+                    type="button"
+                    aria-label="Decrease quantity"
+                >
+                    −
+                </button>
 
+                <input
+                    class="quantity-input"
+                    data-product-id="${escapeHTML(id)}"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value="${cart[id].quantity}"
+                    aria-label="Quantity"
+                >
+
+                <button
+                    class="quantity-button quantity-plus"
+                    data-product-id="${escapeHTML(id)}"
+                    type="button"
+                    aria-label="Increase quantity"
+                >
+                    +
+                </button>
+
+            </div>
+        `
+                : `
+            <button
+                class="card-btn"
+                data-product-id="${escapeHTML(id)}"
+                type="button"
+            >
+                Add to Cart
             </button>
+        `
+            }
 
         </div>
     `;
@@ -594,6 +633,34 @@ function removeFromCart(id) {
   delete cart[id];
 
   saveCart();
+
+  renderProducts();
+}
+
+function setCartQuantity(id, quantity) {
+  quantity = Number(quantity);
+
+  if (!Number.isFinite(quantity)) {
+    return;
+  }
+
+  quantity = Math.floor(quantity);
+
+  if (quantity <= 0) {
+    removeFromCart(id);
+
+    return;
+  }
+
+  if (!cart[id]) {
+    return;
+  }
+
+  cart[id].quantity = quantity;
+
+  saveCart();
+
+  renderCart();
 
   renderProducts();
 }
@@ -1005,7 +1072,7 @@ function showCheckoutError(message) {
    ========================================================= */
 
 cardContainer.addEventListener("click", (event) => {
-  const button = event.target.closest(".card-btn");
+  const button = event.target.closest("[data-product-id]");
 
   if (!button) {
     return;
@@ -1013,17 +1080,45 @@ cardContainer.addEventListener("click", (event) => {
 
   const id = button.dataset.productId;
 
-  const product = productData.find((product) => product._id === id);
+  if (button.classList.contains("quantity-minus")) {
+    setCartQuantity(id, cart[id].quantity - 1);
 
-  if (!product) {
     return;
   }
 
-  if (cart[id]) {
-    removeFromCart(id);
-  } else {
-    addToCart(product);
+  if (button.classList.contains("quantity-plus")) {
+    setCartQuantity(id, cart[id].quantity + 1);
+
+    return;
   }
+
+  if (button.classList.contains("card-btn")) {
+    addToCart(productData.find((product) => product._id === id));
+
+    return;
+  }
+});
+
+cardContainer.addEventListener("change", (event) => {
+  const input = event.target.closest(".quantity-input");
+
+  if (!input) {
+    return;
+  }
+
+  const id = input.dataset.productId;
+
+  setCartQuantity(id, input.value);
+});
+
+cardContainer.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || !event.target.matches(".quantity-input")) {
+    return;
+  }
+
+  event.preventDefault();
+
+  event.target.blur();
 });
 
 /* =========================================================
