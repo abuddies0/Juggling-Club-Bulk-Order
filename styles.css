@@ -575,9 +575,9 @@ main {
 }
 
 .quantity-selector .quantity-button {
-    height: 100% !important;
-    min-height: 0;
-    padding: 0;
+  height: 100% !important;
+  min-height: 0;
+  padding: 0;
 }
 
 .quantity-button:hover {
@@ -1073,6 +1073,38 @@ main {
 
 .checkout-error.hidden {
   display: none;
+}
+
+.checkout-manual-links {
+  font-size: 0.7em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-surface-secondary);
+  overflow: scroll;
+  max-height: 120px;
+  scrollbar-width: none;
+  padding-left: 24px;
+}
+
+.checkout-manual-links.hidden {
+  display: none;
+}
+
+.checkout-manual-link {
+  color: var(--color-primary);
+  font-size: 1em;
+  font-weight: 600;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+
+.checkout-manual-link:hover {
+  color: var(--color-primary-hover);
 }
 
 /* =========================================================

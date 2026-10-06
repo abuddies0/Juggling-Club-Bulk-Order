@@ -1,5 +1,5 @@
 const FORM_LINK =
- "https://docs.google.com/forms/d/e/1FAIpQLScI-1qgMCGhQgzdsenBt1MzKtdyFpCehfJFjNnA-YG3qHFIhg/viewform?usp=pp_url&entry.13087554={{NAME}}&entry.2096004215={{EMAIL}}&entry.927686952={{ITEM_NAME}}&entry.1026536920={{ITEM_SKU}}&entry.1024599410={{ITEM_QTY}}&entry.1629513907={{ITEM_COLOR}}";
+  "https://docs.google.com/forms/d/e/1FAIpQLScI-1qgMCGhQgzdsenBt1MzKtdyFpCehfJFjNnA-YG3qHFIhg/viewform?usp=pp_url&entry.13087554={{NAME}}&entry.2096004215={{EMAIL}}&entry.927686952={{ITEM_NAME}}&entry.1026536920={{ITEM_SKU}}&entry.1024599410={{ITEM_QTY}}&entry.1629513907={{ITEM_COLOR}}";
 
 // const FORM_LINK =
 //   "https://docs.google.com/forms/d/e/1FAIpQLSfbJgphqpuB3G9-JdHrKdFjhXXxlXwhq9_Wv-ieHgdSgnDtSw/viewform?usp=pp_url&entry.13087554=%7B%7BNAME%7D%7D&entry.2096004215=%7B%7BEMAIL%7D%7D&entry.927686952=%7B%7BITEM_NAME%7D%7D&entry.1026536920=%7B%7BITEM_SKU%7D%7D&entry.1024599410=%7B%7BITEM_QTY%7D%7D&entry.1629513907=%7B%7BITEM_COLOR%7D%7D";
@@ -95,6 +95,8 @@ const buyerEmailInput = document.getElementById("buyer-email");
 const buyerEmailConfirmInput = document.getElementById("buyer-email-confirm");
 
 const checkoutError = document.getElementById("checkout-error");
+
+const checkoutManualLinks = document.getElementById("checkout-manual-links");
 
 /* ===== Theme ===== */
 
@@ -948,6 +950,8 @@ function createCheckoutURL(group, name, email) {
 }
 
 function openCheckoutDialog() {
+  checkoutManualLinks.innerHTML = "";
+  checkoutManualLinks.classList.add("hidden");
   const buyerInfo = loadBuyerInfo();
 
   buyerNameInput.value = buyerInfo.name;
@@ -1024,26 +1028,34 @@ function submitCheckout() {
 
   saveBuyerInfo(name, email);
 
-  /*
-   * Open all tabs immediately while this function
-   * is still executing as the result of the user's
-   * Checkout click.
-   */
   const windows = groups.map(() => window.open("about:blank", "_blank"));
 
-  /*
-   * Check whether the browser blocked any popups.
-   */
   const blocked = windows.some((window) => !window);
 
   if (blocked) {
+    // Close any tabs that were successfully opened.
     for (const window of windows) {
       if (window) {
         window.close();
       }
     }
 
-    showCheckoutError("Your browser blocked the checkout tabs. " + "Please allow pop-ups for this site and try again.");
+    const links = groups
+      .map((group, index) => {
+        const url = createCheckoutURL(group, name, email);
+
+        return `
+        <li>
+            <a class="checkout-manual-link" href="${escapeHTML(url)} "target="_blank" rel="noopener noreferrer">${escapeHTML(group.name)}</a>
+        </li>
+        `;
+      })
+      .join("");
+
+    showCheckoutError("Your browser blocked the checkout tabs. " + "Click each link below to open the forms manually.");
+
+    checkoutManualLinks.innerHTML = links;
+    checkoutManualLinks.classList.remove("hidden");
 
     return;
   }
